@@ -2,6 +2,7 @@ package utils.eiffelyk.www.rsademo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -11,8 +12,7 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public class MainActivity extends Activity implements OnClickListener
-{
+public class MainActivity extends Activity implements OnClickListener{
 	private Button btn1, btn2;// 加密，解密
 	private EditText et1, et2, et3;// 需加密的内容，加密后的内容，解密后的内容
 
@@ -37,15 +37,13 @@ public class MainActivity extends Activity implements OnClickListener
 			"WY8qiToCV5xxTVg=";
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initView();
 	}
 
-	private void initView()
-	{
+	private void initView(){
 		btn1 = (Button) findViewById(R.id.btn1);
 		btn2 = (Button) findViewById(R.id.btn2);
 		btn1.setOnClickListener(this);
@@ -57,15 +55,12 @@ public class MainActivity extends Activity implements OnClickListener
 	}
 
 	@Override
-	public void onClick(View v)
-	{
-		switch (v.getId())
-		{
+	public void onClick(View v){
+		switch (v.getId()){
 		// 加密
 		case R.id.btn1:
 			String source = et1.getText().toString().trim();
-			try
-			{
+			try{
 				// 从字符串中得到公钥
 				// PublicKey publicKey = RSAUtils.loadPublicKey(PUCLIC_KEY);
 				// 从文件中得到公钥
@@ -74,29 +69,26 @@ public class MainActivity extends Activity implements OnClickListener
 				// 加密
 				byte[] encryptByte = RSAUtils.encryptData(source.getBytes(), publicKey);
 				// 为了方便观察吧加密后的数据用base64加密转一下，要不然看起来是乱码,所以解密是也是要用Base64先转换
-				String afterEncrypt = Base64Utils.encode(encryptByte);
+				String afterEncrypt = Base64.encodeToString(encryptByte, Base64.DEFAULT);
 				et2.setText(afterEncrypt);
-			} catch (Exception e)
-			{
+			} catch (Exception e){
 				e.printStackTrace();
 			}
 			break;
 		// 解密
 		case R.id.btn2:
 			String encryptContent = et2.getText().toString().trim();
-			try
-			{
+			try	{
 				// 从字符串中得到私钥
 				// PrivateKey privateKey = RSAUtils.loadPrivateKey(PRIVATE_KEY);
 				// 从文件中得到私钥
 				InputStream inPrivate = getResources().getAssets().open("pkcs8_rsa_private.pem");
 				PrivateKey privateKey = RSAUtils.loadPrivateKey(inPrivate);
 				// 因为RSA加密后的内容经Base64再加密转换了一下，所以先Base64解密回来再给RSA解密
-				byte[] decryptByte = RSAUtils.decryptData(Base64Utils.decode(encryptContent), privateKey);
+				byte[] decryptByte = RSAUtils.decryptData(Base64.decode(encryptContent, Base64.DEFAULT), privateKey);
 				String decryptStr = new String(decryptByte);
 				et3.setText(decryptStr);
-			} catch (Exception e)
-			{
+			} catch (Exception e){
 				e.printStackTrace();
 			}
 			break;
